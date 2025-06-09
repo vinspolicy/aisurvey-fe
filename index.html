@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>जनता सर्वे रिकॉर्डिंग</title>
+  <style>
+    #step2, #step3 {
+      display: none;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎙️ चरण 1: उत्तरदाता का ऑडियो रिकॉर्ड करें</h1>
+  <button id="recordButton">रिकॉर्ड शुरू करें</button>
+  <button id="stopButton" disabled>रोकें</button>
+  <p id="status"></p>
+
+  <div id="step2">
+    <h2>चरण 2: सही समस्याएँ चुनें</h2>
+    <div id="coreIdeas"></div>
+  </div>
+
+  <div id="step3">
+    <h2>चरण 3: छूटी हुई समस्या जोड़ें</h2>
+    <input type="text" id="newIdeaInput" placeholder="नई समस्या जोड़ें..." />
+    <button id="addIdeaButton">जोड़ें</button>
+    <ul id="newIdeasList"></ul>
+    <br>
+<button id="submitButton">✅ सबमिट करें</button>
+<p id="finalStatus" style="color: green;"></p>
+  </div>
+
+  <script src="index.js"></script>
+</body>
+</html>
