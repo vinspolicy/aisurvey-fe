@@ -66,11 +66,11 @@ stopButton.onclick = () => {
 
 function displayCoreIdeas(ideasJson) {
   try {
-    const ideas = JSON.parse(ideasJson);
+    // const ideas = JSON.parse(ideasJson);
     console.log("Reached Here");
     console.log("Parsed Ideas:", ideas);
     coreIdeasDiv.innerHTML = "<h3>मुख्य समस्याएँ:</h3>";
-    ideas.forEach((idea) => {
+    ideasJson.forEach((idea) => {
       const label = document.createElement("label");
       label.innerHTML = `<input type="checkbox" checked> ${idea}`;
       coreIdeasDiv.appendChild(label);
