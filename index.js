@@ -37,7 +37,7 @@ recordButton.onclick = async () => {
 
       const result = await response.json();
       console.log("प्राप्त JSON:", result);
-
+      console.log("Core Ideas:", result.core_ideas);
       statusText.textContent = "उत्तर प्राप्त हुआ ✅";
       displayCoreIdeas(result.core_ideas);
     } catch (error) {
