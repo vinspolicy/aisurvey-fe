@@ -93,7 +93,7 @@ document.getElementById("addIdeaButton").onclick = () => {
   }
 };
 
-document.getElementById("submitButton").onclick = () => {
+document.getElementById("submitButton").onclick = async () => {
   const selectedIdeas = [];
   document.querySelectorAll("#coreIdeas input[type=checkbox]").forEach((checkbox) => {
     if (checkbox.checked) {
@@ -108,9 +108,20 @@ document.getElementById("submitButton").onclick = () => {
 
   const allIdeas = selectedIdeas.concat(addedIdeas);
 
-  // Future: send allIdeas to backend
+  try {
+    const response = await fetch("https://aisurvey-be-your-service.onrender.com/update", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ideas: allIdeas }),
+    });
 
-  console.log("Final list of core ideas:", allIdeas);
-  document.getElementById("finalStatus").textContent =
-    "✅ समस्याएँ सफलतापूर्वक जमा की गईं!";
+    const result = await response.json();
+    console.log("Backend response:", result);
+    document.getElementById("finalStatus").textContent = "✅ समस्याएँ सफलतापूर्वक जमा की गईं!";
+  } catch (error) {
+    console.error("Backend update error:", error);
+    document.getElementById("finalStatus").textContent = "❌ सर्वर त्रुटि! कृपया पुनः प्रयास करें।";
+  }
 };
