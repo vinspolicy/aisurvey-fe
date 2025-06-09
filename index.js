@@ -37,7 +37,6 @@ recordButton.onclick = async () => {
 
       const result = await response.json();
       console.log("प्राप्त JSON:", result);
-      console.log("Core Ideas:", result.core_ideas);
       statusText.textContent = "उत्तर प्राप्त हुआ ✅";
       displayCoreIdeas(result.core_ideas);
     } catch (error) {
@@ -66,9 +65,6 @@ stopButton.onclick = () => {
 
 function displayCoreIdeas(ideasJson) {
   try {
-    // const ideas = JSON.parse(ideasJson);
-    console.log("Reached Here");
-    // console.log("Parsed Ideas:", ideas);
     coreIdeasDiv.innerHTML = "<h3>मुख्य समस्याएँ:</h3>";
     ideasJson.forEach((idea) => {
       const label = document.createElement("label");
@@ -111,7 +107,7 @@ document.getElementById("submitButton").onclick = async () => {
   const allIdeas = selectedIdeas.concat(addedIdeas);
 
   try {
-    const response = await fetch("https://aisurvey-be-your-service.onrender.com/update", {
+    const response = await fetch("https://aisurvey-be.onrender.com/update", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
