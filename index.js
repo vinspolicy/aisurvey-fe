@@ -67,6 +67,7 @@ stopButton.onclick = () => {
 function displayCoreIdeas(ideasJson) {
   try {
     const ideas = JSON.parse(ideasJson);
+    console.log("Reached Here");
     console.log("Parsed Ideas:", ideas);
     coreIdeasDiv.innerHTML = "<h3>मुख्य समस्याएँ:</h3>";
     ideas.forEach((idea) => {
