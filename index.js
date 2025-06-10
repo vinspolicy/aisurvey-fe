@@ -107,7 +107,7 @@ document.getElementById("submitButton").onclick = async () => {
   const allIdeas = selectedIdeas.concat(addedIdeas);
 
   try {
-    const response = await fetch("https://aisurvey-be.onrender.com/update", {
+    const response = await fetch("https://aisurvey-be.onrender.com/update-database", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
