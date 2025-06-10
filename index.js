@@ -105,6 +105,7 @@ document.getElementById("submitButton").onclick = async () => {
   });
 
   const allIdeas = selectedIdeas.concat(addedIdeas);
+  console.log(allIdeas);
 
   try {
     const response = await fetch("https://aisurvey-be.onrender.com/update-database/", {
