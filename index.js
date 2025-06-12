@@ -116,7 +116,7 @@ document.getElementById("submitButton").onclick = async () => {
     });
 
     const result = await response.json();
-    console.log("Backend response:", result);
+    console.log("Backend execution log:", result.log);
     document.getElementById("finalStatus").textContent = "✅ समस्याएँ सफलतापूर्वक जमा की गईं!";
   } catch (error) {
     console.error("Backend update error:", error);
