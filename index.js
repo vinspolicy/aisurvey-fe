@@ -105,10 +105,9 @@ document.getElementById("submitButton").onclick = async () => {
   });
 
   const allIdeas = selectedIdeas.concat(addedIdeas);
-  console.log("Idea List:", allIdeas);
 
   try {
-    const response = await fetch("https://aisurvey-be.onrender.com/update-database/", {
+    const response = await fetch("https://aisurvey-be.onrender.com/update-database", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -116,8 +115,36 @@ document.getElementById("submitButton").onclick = async () => {
       body: JSON.stringify({ ideas: allIdeas }),
     });
 
-    const result = await response.json();
-    console.log("Backend execution log:", result.log);
+    // 2) Log status and raw text
+    console.log("Response status:", response.status);
+    const text = await response.text();
+    console.log("Response text:", text);
+
+    // 3) Parse JSON safely
+    let data;
+    try {
+      data = JSON.parse(text);
+      console.log("Parsed JSON:", data);
+    } catch (e) {
+      console.error("Failed to parse JSON:", e);
+      document.getElementById("finalStatus").textContent =
+        "❌ सर्वर ने अपेक्षित JSON नहीं भेजा।";
+      return;
+    }
+
+    // 4) Handle server‐side errors
+    if (data.error) {
+      console.error("Server error:", data.error);
+      document.getElementById("finalStatus").textContent =
+        `❌ त्रुटि: ${data.error}`;
+      return;
+    }
+
+    // 5) Inspect the execution log
+    if (data.log) {
+      console.log("Backend execution log:", data.log);
+    }
+
     document.getElementById("finalStatus").textContent = "✅ समस्याएँ सफलतापूर्वक जमा की गईं!";
   } catch (error) {
     console.error("Backend update error:", error);
