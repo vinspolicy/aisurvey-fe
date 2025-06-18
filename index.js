@@ -127,3 +127,41 @@ submitBtn.onclick = async () => {
     finalStatus.textContent = "❌ Failed to save.";
   }
 };
+
+// Export the surveyDB from localStorage as a .json download
+document.getElementById("exportButton").onclick = () => {
+  const dataStr = localStorage.getItem("surveyDB") || "[]";
+  const blob = new Blob([dataStr], { type: "application/json" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = "surveyDB.json";
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+// Trigger the hidden file input for import
+document.getElementById("importButton").onclick = () => {
+  document.getElementById("importFileInput").click();
+};
+
+// When a file is selected, read & validate it, then overwrite localStorage
+document.getElementById("importFileInput").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    if (!Array.isArray(parsed)) throw new Error("Invalid format");
+    // Overwrite in-memory and localStorage DB
+    db = parsed;
+    localStorage.setItem("surveyDB", JSON.stringify(db));
+    alert("✅ DB imported successfully!");
+    // Optionally, refresh UI or re-run displayCoreIdeas()
+  } catch (err) {
+    console.error("Import error:", err);
+    alert("❌ Failed to import: invalid JSON.");
+  } finally {
+    e.target.value = ""; // reset input
+  }
+});
