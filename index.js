@@ -70,13 +70,29 @@ stopButton.onclick = () => {
 
 // 2️⃣ Show checkboxes for core ideas
 function displayCoreIdeas(ideas) {
+  let ideaArray;
+
+  // If it's already an array, use it; 
+  // if it's a string, try to JSON.parse it
+  if (Array.isArray(ideas)) {
+    ideaArray = ideas;
+  } else {
+    try {
+      ideaArray = JSON.parse(ideas);
+    } catch (e) {
+      console.warn("Could not parse core_ideas, treating as single idea:", ideas);
+      ideaArray = [ideas];
+    }
+  }
+
   coreIdeasDiv.innerHTML = "<h3>मुख्य समस्याएँ:</h3>";
-  ideas.forEach(idea => {
+  ideaArray.forEach((idea) => {
     const label = document.createElement("label");
     label.innerHTML = `<input type="checkbox" checked> ${idea}`;
     coreIdeasDiv.appendChild(label);
     coreIdeasDiv.appendChild(document.createElement("br"));
   });
+
   step2.style.display = "block";
   step3.style.display = "block";
 }
