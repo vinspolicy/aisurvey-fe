@@ -1,117 +1,100 @@
 // aisurvey-fe/index.js
 
-let mediaRecorder;
-let audioChunks = [];
+let mediaRecorder, audioChunks = [];
 
-// Load or initialize the DB in localStorage
-let db = JSON.parse(localStorage.getItem("aiSurveyDB") || "[]");
+// Load or init DB in localStorage
+let db = JSON.parse(localStorage.getItem("surveyDB") || "[]");
 
-const recordButton   = document.getElementById("recordButton");
-const stopButton     = document.getElementById("stopButton");
-const statusText     = document.getElementById("status");
-const coreIdeasDiv   = document.getElementById("coreIdeas");
-const step2          = document.getElementById("step2");
-const step3          = document.getElementById("step3");
-const submitButton   = document.getElementById("submitButton");
-const finalStatus    = document.getElementById("finalStatus");
+// UI refs
+const recordBtn   = document.getElementById("recordButton");
+const stopBtn     = document.getElementById("stopButton");
+const statusText  = document.getElementById("status");
+const coreDiv     = document.getElementById("coreIdeas");
+const step2       = document.getElementById("step2");
+const step3       = document.getElementById("step3");
+const submitBtn   = document.getElementById("submitButton");
+const finalStatus = document.getElementById("finalStatus");
 
-// 1️⃣ Record audio and transcribe
-recordButton.onclick = async () => {
-  recordButton.disabled = true;
-  stopButton.disabled   = false;
-  statusText.textContent = "रिकॉर्डिंग...";
-  coreIdeasDiv.innerHTML = "";
-  step2.style.display    = "none";
-  step3.style.display    = "none";
+// 1️⃣ Record & Transcribe
+recordBtn.onclick = async () => {
+  recordBtn.disabled = true;
+  stopBtn.disabled   = false;
+  statusText.textContent = "Recording…";
+  coreDiv.innerHTML = "";
+  step2.style.display = "none";
+  step3.style.display = "none";
 
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   mediaRecorder = new MediaRecorder(stream);
-  audioChunks  = [];
+  audioChunks = [];
 
   mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
   mediaRecorder.onstop = async () => {
-    const blob    = new Blob(audioChunks, { type: "audio/mp3" });
-    const form    = new FormData();
-    form.append("file", blob, "sample.mp3");
+    const blob = new Blob(audioChunks, { type: "audio/mp3" });
+    const fd = new FormData();
+    fd.append("file", blob);
 
-    statusText.textContent = "ट्रांसक्रिप्शन हो रहा है...";
+    statusText.textContent = "Transcribing…";
     try {
-      const resp   = await fetch("https://whisper-be-78j7.onrender.com/transcribe/", {
+      const res = await fetch("https://whisper-be-78j7.onrender.com/transcribe/", {
         method: "POST",
-        body: form
+        body: fd
       });
-      const result = await resp.json();
-      statusText.textContent = "ट्रांसक्रिप्शन प्राप्त!";
-      displayCoreIdeas(result.core_ideas);
-    } catch (err) {
-      statusText.textContent = "त्रुटि हुई!";
-      console.error(err);
+      const { core_ideas } = await res.json();
+      statusText.textContent = "Transcription done!";
+      displayCoreIdeas(core_ideas);
+    } catch (e) {
+      console.error(e);
+      statusText.textContent = "Error during transcription.";
     }
   };
 
   mediaRecorder.start();
-  // Auto-stop after 15s
   setTimeout(() => {
     if (mediaRecorder.state !== "inactive") {
       mediaRecorder.stop();
-      stopButton.disabled = true;
-      recordButton.disabled = false;
+      stopBtn.disabled = true;
+      recordBtn.disabled = false;
     }
   }, 15000);
 };
 
-stopButton.onclick = () => {
+stopBtn.onclick = () => {
   if (mediaRecorder && mediaRecorder.state !== "inactive") {
     mediaRecorder.stop();
-    stopButton.disabled = true;
-    recordButton.disabled = false;
+    stopBtn.disabled = true;
+    recordBtn.disabled = false;
   }
 };
 
-// 2️⃣ Show checkboxes for core ideas
-function displayCoreIdeas(ideas) {
-  let ideaArray;
-
-  // If it's already an array, use it; 
-  // if it's a string, try to JSON.parse it
-  if (Array.isArray(ideas)) {
-    ideaArray = ideas;
-  } else {
-    try {
-      ideaArray = JSON.parse(ideas);
-    } catch (e) {
-      console.warn("Could not parse core_ideas, treating as single idea:", ideas);
-      ideaArray = [ideas];
-    }
-  }
-
-  coreIdeasDiv.innerHTML = "<h3>मुख्य समस्याएँ:</h3>";
-  ideaArray.forEach((idea) => {
-    const label = document.createElement("label");
-    label.innerHTML = `<input type="checkbox" checked> ${idea}`;
-    coreIdeasDiv.appendChild(label);
-    coreIdeasDiv.appendChild(document.createElement("br"));
+// 2️⃣ Show core ideas
+function displayCoreIdeas(raw) {
+  // raw might be JSON-string or array
+  let ideas = Array.isArray(raw) ? raw : JSON.parse(raw);
+  coreDiv.innerHTML = "<h3>Core Ideas:</h3>";
+  ideas.forEach(i => {
+    const lbl = document.createElement("label");
+    lbl.innerHTML = `<input type="checkbox" checked> ${i}`;
+    coreDiv.appendChild(lbl);
+    coreDiv.appendChild(document.createElement("br"));
   });
-
   step2.style.display = "block";
   step3.style.display = "block";
 }
 
-// 3️⃣ Add a manual idea
+// 3️⃣ Add manual idea
 document.getElementById("addIdeaButton").onclick = () => {
-  const input = document.getElementById("newIdeaInput");
-  const val   = input.value.trim();
-  if (val) {
-    const li = document.createElement("li");
-    li.textContent = val;
-    document.getElementById("newIdeasList").appendChild(li);
-    input.value = "";
-  }
+  const inp = document.getElementById("newIdeaInput");
+  const v = inp.value.trim();
+  if (!v) return;
+  const li = document.createElement("li");
+  li.textContent = v;
+  document.getElementById("newIdeasList").appendChild(li);
+  inp.value = "";
 };
 
-// 4️⃣ Submit & sync DB
-submitButton.onclick = async () => {
-  // Gather selected + added
+// 4️⃣ Submit & sync
+submitBtn.onclick = async () => {
   const selected = Array.from(
     document.querySelectorAll("#coreIdeas input[type=checkbox]")
   )
@@ -123,39 +106,24 @@ submitButton.onclick = async () => {
   ).map(li => li.textContent.trim());
 
   const allIdeas = selected.concat(added);
-  statusText.textContent = "डेटा सर्वर भेज रहे हैं...";
+  statusText.textContent = "Submitting ideas…";
 
   try {
-    const updatedDb = await syncDatabase(allIdeas);
-    console.log("Updated DB:", updatedDb);
-    finalStatus.textContent = "✅ सफलतापूर्वक अपडेट किया!";
-  } catch (err) {
-    console.error(err);
-    finalStatus.textContent = "❌ अपडेट विफल!";
+    const resp = await fetch("https://aisurvey-be.onrender.com/process-db/", {
+      method: "POST",
+      headers: { "Content-Type":"application/json" },
+      body: JSON.stringify({
+        database: db,
+        incoming_ideas: allIdeas
+      })
+    });
+    const { database: updated } = await resp.json();
+    // overwrite device DB
+    db = updated;
+    localStorage.setItem("surveyDB", JSON.stringify(db));
+    finalStatus.textContent = `✅ Saved! Total distinct ideas: ${db.length}`;
+  } catch (e) {
+    console.error(e);
+    finalStatus.textContent = "❌ Failed to save.";
   }
 };
-
-// Core function: upload DB + ideas, download and overwrite in localStorage
-async function syncDatabase(coreIdeas) {
-  // Build payload
-  const payload = {
-    incoming_ideas: coreIdeas,
-    database: db
-  };
-
-  // Send as JSON
-  const resp = await fetch("https://aisurvey-be.onrender.com/process-db/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-  if (!resp.ok) {
-    throw new Error("Server error " + resp.status);
-  }
-  const json = await resp.json();
-
-  // Overwrite localStorage DB
-  db = json.database;
-  localStorage.setItem("aiSurveyDB", JSON.stringify(db));
-  return db;
-}
