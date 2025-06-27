@@ -122,9 +122,11 @@ submitBtn.onclick = async () => {
     db = updated;
     localStorage.setItem("surveyDB", JSON.stringify(db));
     finalStatus.textContent = `✅ Saved! Total distinct ideas: ${db.length}`;
+    statusText.style.display = "none";
   } catch (e) {
     console.error(e);
     finalStatus.textContent = "❌ Failed to save.";
+    statusText.style.display = "none";
   }
 };
 
